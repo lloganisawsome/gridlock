@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090b0f">
+  <meta name="description" content="Live civic portal for the Gridlock SMP.">
+  <title>Gridlock SMP | Civic Network</title>
+  <link rel="preconnect" href="https://www.gstatic.com">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
+</head>
+<body>
+  <div class="noise"></div>
+  <header class="topbar">
+    <a class="brand" href="#overview" aria-label="Gridlock home">
+      <img src="./assets/gridlock-logo.jpg" alt="">
+      <span><b>GRIDLOCK</b><small>CIVIC NETWORK</small></span>
+    </a>
+    <nav class="topnav" aria-label="Primary">
+      <button class="nav-link active" data-view="overview">Overview</button>
+      <button class="nav-link" data-view="map">Live map</button>
+      <button class="nav-link" data-view="government">Government</button>
+      <button class="nav-link" data-view="economy">Economy</button>
+      <button class="nav-link" data-view="community">Community</button>
+    </nav>
+    <div class="server-pill"><span class="status-dot" id="statusDot"></span><span id="serverState">Connecting</span></div>
+  </header>
+
+  <main>
+    <section class="hero" id="hero">
+      <div class="hero-shade"></div>
+      <div class="hero-content">
+        <div class="eyebrow"><span>GRIDLOCK SMP</span><span id="worldClock">--:--</span></div>
+        <h1>The city is live.</h1>
+        <p>Public records, city services, commerce, transportation, and server activity in one civic network.</p>
+        <div class="hero-actions">
+          <button class="primary-button" data-view="map"><i data-lucide="map"></i> Open live map</button>
+          <button class="ghost-button" data-view="news"><i data-lucide="newspaper"></i> City news</button>
+        </div>
+      </div>
+      <div class="hero-metrics">
+        <article><span>ONLINE</span><strong id="onlineCount">0</strong><small id="capacityText">of 30 players</small></article>
+        <article><span>UPTIME</span><strong id="uptimeText">--</strong><small id="restartText">waiting for bridge</small></article>
+        <article><span>PERFORMANCE</span><strong id="tpsText">-- TPS</strong><small id="memoryText">server telemetry</small></article>
+      </div>
+    </section>
+
+    <div class="ticker" aria-label="City alerts"><div id="tickerTrack">GRIDLOCK CIVIC NETWORK · CONNECTING TO CITY SERVICES ·</div></div>
+
+    <section class="workspace">
+      <aside class="rail">
+        <p class="rail-label">CITY SERVICES</p>
+        <button class="rail-link active" data-view="overview"><i data-lucide="layout-dashboard"></i><span>Overview</span></button>
+        <button class="rail-link" data-view="players"><i data-lucide="users"></i><span>Citizens</span></button>
+        <button class="rail-link" data-view="map"><i data-lucide="map-pinned"></i><span>Live map</span></button>
+        <button class="rail-link" data-view="government"><i data-lucide="landmark"></i><span>Government</span></button>
+        <button class="rail-link" data-view="justice"><i data-lucide="scale"></i><span>Justice</span></button>
+        <button class="rail-link" data-view="economy"><i data-lucide="chart-no-axes-combined"></i><span>Economy</span></button>
+        <button class="rail-link" data-view="property"><i data-lucide="building-2"></i><span>Property</span></button>
+        <button class="rail-link" data-view="news"><i data-lucide="newspaper"></i><span>News</span></button>
+        <button class="rail-link" data-view="transport"><i data-lucide="train-front"></i><span>Transport</span></button>
+        <button class="rail-link" data-view="emergency"><i data-lucide="siren"></i><span>Emergency</span></button>
+        <button class="rail-link" data-view="analytics"><i data-lucide="chart-spline"></i><span>City data</span></button>
+        <button class="rail-link" data-view="community"><i data-lucide="message-square-more"></i><span>Community</span></button>
+        <a class="rail-link staff-link" href="./admin.html"><i data-lucide="shield-check"></i><span>Staff access</span></a>
+      </aside>
+
+      <div class="content">
+        <div class="view active" data-page="overview">
+          <div class="section-heading"><div><span class="kicker">CITY OVERVIEW</span><h2>Good evening, Gridlock.</h2></div><span class="updated" id="lastUpdated">Awaiting first update</span></div>
+          <div class="dashboard-grid">
+            <article class="panel span-2">
+              <header><div><span class="panel-label">CURRENT BULLETIN</span><h3 id="leadNewsTitle">City services are connecting</h3></div><i data-lucide="radio-tower"></i></header>
+              <p id="leadNewsBody">Live announcements will appear here as soon as the server bridge publishes its first snapshot.</p>
+              <a class="text-link" href="#news" data-view="news">Read city news <i data-lucide="arrow-right"></i></a>
+            </article>
+            <article class="panel">
+              <header><div><span class="panel-label">CITY POPULATION</span><h3 id="citizenCount">0 registered</h3></div><i data-lucide="users-round"></i></header>
+              <div class="mini-bars" id="populationBars"></div>
+            </article>
+            <article class="panel">
+              <header><div><span class="panel-label">PUBLIC SAFETY</span><h3 id="wantedCount">0 wanted</h3></div><i data-lucide="badge-alert"></i></header>
+              <div class="metric-list"><span>Open dispatches <b id="dispatchCount">0</b></span><span>Active warrants <b id="warrantCount">0</b></span><span>Court cases <b id="caseCount">0</b></span></div>
+            </article>
+            <article class="panel span-2 map-preview">
+              <header><div><span class="panel-label">LIVE CITY MAP</span><h3>Movement across Gridlock</h3></div><button class="icon-button" data-view="map" aria-label="Expand map"><i data-lucide="maximize-2"></i></button></header>
+              <div class="map-canvas compact" id="overviewMap"></div>
+            </article>
+            <article class="panel">
+              <header><div><span class="panel-label">CITY ECONOMY</span><h3 id="economyTotal">$0 circulating</h3></div><i data-lucide="circle-dollar-sign"></i></header>
+              <div class="metric-list"><span>Businesses <b id="businessCount">0</b></span><span>Properties <b id="propertyCount">0</b></span><span>Open jobs <b id="jobCount">0</b></span></div>
+            </article>
+            <article class="panel">
+              <header><div><span class="panel-label">INFRASTRUCTURE</span><h3 id="projectCount">0 active projects</h3></div><i data-lucide="hard-hat"></i></header>
+              <div class="metric-list"><span>Transit alerts <b id="transitCount">0</b></span><span>Next event <b id="nextEvent">None posted</b></span></div>
+            </article>
+          </div>
+        </div>
+
+        <div class="view" data-page="players">
+          <div class="section-heading"><div><span class="kicker">CITIZEN DIRECTORY</span><h2>Player profiles</h2></div><input class="search-input" id="playerSearch" placeholder="Search citizens"></div>
+          <div class="card-grid" id="playerGrid"></div>
+        </div>
+
+        <div class="view" data-page="map">
+          <div class="section-heading"><div><span class="kicker">LIVE OPERATIONS MAP</span><h2>Gridlock City</h2></div><div class="segmented"><button class="active" data-map-layer="players">Players</button><button data-map-layer="property">Property</button><button data-map-layer="incidents">Incidents</button></div></div>
+          <article class="panel map-shell">
+            <div class="map-toolbar"><span><i data-lucide="radio"></i> Live locations refresh from the server bridge</span><div><button class="icon-button" id="zoomOut" aria-label="Zoom out"><i data-lucide="minus"></i></button><button class="icon-button" id="zoomIn" aria-label="Zoom in"><i data-lucide="plus"></i></button></div></div>
+            <div class="map-canvas full" id="liveMap"></div>
+          </article>
+        </div>
+
+        <div class="view" data-page="government"><div class="section-heading"><div><span class="kicker">PUBLIC ADMINISTRATION</span><h2>Government</h2></div></div><div class="split-grid"><article class="panel"><header><h3>Office holders</h3><i data-lucide="landmark"></i></header><div id="officialsList" class="record-list"></div></article><article class="panel"><header><h3>Announcements</h3><i data-lucide="megaphone"></i></header><div id="governmentNews" class="record-list"></div></article><article class="panel span-2"><header><h3>Elections and public votes</h3><i data-lucide="vote"></i></header><div id="electionsList" class="record-list"></div></article></div></div>
+        <div class="view" data-page="justice"><div class="section-heading"><div><span class="kicker">COURTS & PUBLIC SAFETY</span><h2>Justice records</h2></div></div><div class="split-grid"><article class="panel"><header><h3>Wanted list</h3><i data-lucide="shield-alert"></i></header><div id="wantedList" class="record-list"></div></article><article class="panel"><header><h3>Active warrants</h3><i data-lucide="file-warning"></i></header><div id="warrantsList" class="record-list"></div></article><article class="panel span-2"><header><h3>Court calendar</h3><i data-lucide="calendar-days"></i></header><div id="courtList" class="record-list"></div></article></div></div>
+        <div class="view" data-page="economy"><div class="section-heading"><div><span class="kicker">MARKETS & EMPLOYMENT</span><h2>Gridlock economy</h2></div></div><div class="split-grid"><article class="panel"><header><h3>Company directory</h3><i data-lucide="briefcase-business"></i></header><div id="businessList" class="record-list"></div></article><article class="panel"><header><h3>Job board</h3><i data-lucide="clipboard-list"></i></header><div id="jobsList" class="record-list"></div></article><article class="panel span-2"><header><h3>Wealth rankings</h3><i data-lucide="chart-column-big"></i></header><div id="wealthList" class="record-list"></div></article></div></div>
+        <div class="view" data-page="property"><div class="section-heading"><div><span class="kicker">LAND & DEVELOPMENT</span><h2>Property registry</h2></div></div><div class="split-grid"><article class="panel span-2"><header><h3>Registered land and buildings</h3><i data-lucide="map"></i></header><div id="propertyList" class="record-list"></div></article><article class="panel"><header><h3>Building permits</h3><i data-lucide="file-check-2"></i></header><div id="permitList" class="record-list"></div></article><article class="panel"><header><h3>Construction projects</h3><i data-lucide="construction"></i></header><div id="constructionList" class="record-list"></div></article></div></div>
+        <div class="view" data-page="news"><div class="section-heading"><div><span class="kicker">GRIDLOCK NEWSWIRE</span><h2>City news</h2></div></div><div class="news-grid" id="newsGrid"></div></div>
+        <div class="view" data-page="transport"><div class="section-heading"><div><span class="kicker">MOBILITY NETWORK</span><h2>Transportation</h2></div></div><div class="split-grid"><article class="panel"><header><h3>Service status</h3><i data-lucide="train-front"></i></header><div id="transitList" class="record-list"></div></article><article class="panel"><header><h3>Road conditions</h3><i data-lucide="route"></i></header><div id="roadList" class="record-list"></div></article><article class="panel span-2"><header><h3>Airports and schedules</h3><i data-lucide="plane"></i></header><div id="airportList" class="record-list"></div></article></div></div>
+        <div class="view" data-page="emergency"><div class="section-heading"><div><span class="kicker">EMERGENCY SERVICES</span><h2>Incident center</h2></div></div><div class="dispatch-columns"><article class="panel"><header><h3>Police</h3><i data-lucide="badge"></i></header><div id="policeLog" class="record-list"></div></article><article class="panel"><header><h3>Fire</h3><i data-lucide="flame"></i></header><div id="fireLog" class="record-list"></div></article><article class="panel"><header><h3>EMS</h3><i data-lucide="heart-pulse"></i></header><div id="emsLog" class="record-list"></div></article></div></div>
+        <div class="view" data-page="analytics">
+          <div class="section-heading"><div><span class="kicker">CITY DATA & HISTORY</span><h2>Gridlock at a glance</h2></div></div>
+          <div class="dashboard-grid">
+            <article class="panel"><header><h3>Daily activity</h3><i data-lucide="activity"></i></header><strong class="large-metric" id="dailyActive">0</strong><p>Citizens seen online in the latest server snapshot.</p></article>
+            <article class="panel"><header><h3>City wealth</h3><i data-lucide="landmark"></i></header><strong class="large-metric" id="analyticsWealth">$0</strong><p>Combined published net worth.</p></article>
+            <article class="panel"><header><h3>Public safety</h3><i data-lucide="shield-check"></i></header><strong class="large-metric" id="crimeRate">0</strong><p>Open incidents and active warrants.</p></article>
+            <article class="panel"><header><h3>Population</h3><i data-lucide="users"></i></header><strong class="large-metric" id="censusCount">0</strong><p>Registered Gridlock citizens.</p></article>
+            <article class="panel span-2"><header><h3>City budget</h3><i data-lucide="badge-dollar-sign"></i></header><div id="budgetList" class="record-list"></div></article>
+            <article class="panel span-2"><header><h3>Hall of Fame</h3><i data-lucide="trophy"></i></header><div id="hallOfFameList" class="record-list"></div></article>
+            <article class="panel span-2"><header><h3>Historical timeline</h3><i data-lucide="history"></i></header><div id="timelineList" class="record-list"></div></article>
+            <article class="panel span-2"><header><h3>Laws and public code</h3><i data-lucide="book-open-check"></i></header><div id="lawsList" class="record-list"></div></article>
+          </div>
+        </div>
+        <div class="view" data-page="community">
+          <div class="section-heading"><div><span class="kicker">COMMUNITY DESK</span><h2>Talk to City Hall</h2></div></div>
+          <div class="split-grid">
+            <article class="panel">
+              <header><h3>Citizen account</h3><i data-lucide="circle-user-round"></i></header>
+              <form id="citizenLoginForm" class="form-stack">
+                <input id="citizenEmail" type="email" autocomplete="username" placeholder="Email" required>
+                <input id="citizenPassword" type="password" autocomplete="current-password" placeholder="Password" required>
+                <div class="button-row"><button class="primary-button" type="submit">Sign in</button><button class="ghost-button hidden" id="citizenLogoutButton" type="button">Sign out</button></div>
+                <p class="form-note" id="citizenAuthResult">Sign in with your Gridlock account to submit forms.</p>
+              </form>
+            </article>
+            <article class="panel"><header><h3>Upcoming events</h3><i data-lucide="calendar-heart"></i></header><div id="eventList" class="record-list"></div></article>
+            <article class="panel span-2"><header><h3>Submit a request</h3><i data-lucide="send"></i></header><form id="communityForm" class="form-stack"><select id="requestType"><option>Suggestion</option><option>Bug report</option><option>Player report</option><option>Appeal</option></select><input id="requestSubject" placeholder="Subject" maxlength="80" required><textarea id="requestBody" placeholder="Tell us what happened" maxlength="1500" required></textarea><button class="primary-button" type="submit">Submit to staff</button><p class="form-note" id="requestResult">Sign in is required before submission.</p></form></article>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><span>GRIDLOCK CIVIC NETWORK</span><span>Live data may be delayed by up to 15 seconds.</span></footer>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gridlock Staff Operations</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" defer></script>
+</head>
+<body class="admin-page">
+  <div class="noise"></div>
+  <header class="topbar">
+    <a class="brand" href="./index.html"><img src="./assets/gridlock-logo.jpg" alt=""><span><b>GRIDLOCK</b><small>STAFF OPERATIONS</small></span></a>
+    <a class="ghost-button compact-button" href="./index.html"><i data-lucide="external-link"></i> Public portal</a>
+  </header>
+  <main class="admin-main">
+    <section class="auth-shell" id="loginPanel">
+      <div class="auth-visual"><span class="kicker">RESTRICTED SYSTEM</span><h1>Staff operations.</h1><p>Authenticate with a staff-enabled Firebase account to continue.</p></div>
+      <form class="auth-card" id="loginForm">
+        <label>Email<input id="email" type="email" autocomplete="username" required></label>
+        <label>Password<input id="password" type="password" autocomplete="current-password" required></label>
+        <button class="primary-button" type="submit"><i data-lucide="log-in"></i> Authenticate</button>
+        <p class="form-note" id="loginResult">Access is checked against Firebase custom claims.</p>
+      </form>
+    </section>
+    <section class="admin-console hidden" id="adminConsole">
+      <div class="admin-heading"><div><span class="kicker">OPERATIONS CENTER</span><h1>Gridlock control desk</h1><p id="staffIdentity"></p></div><button class="ghost-button" id="logoutButton"><i data-lucide="log-out"></i> Sign out</button></div>
+      <div class="admin-stat-grid">
+        <article><span>SERVER</span><strong id="adminServerState">--</strong></article>
+        <article><span>PLAYERS</span><strong id="adminPlayers">--</strong></article>
+        <article><span>OPEN REPORTS</span><strong id="adminReports">--</strong></article>
+        <article><span>LAST BACKUP</span><strong id="adminBackup">--</strong></article>
+      </div>
+      <div class="admin-grid">
+        <article class="panel">
+          <header><h3>City announcement</h3><i data-lucide="megaphone"></i></header>
+          <form id="announcementForm" class="form-stack"><input id="announcementTitle" placeholder="Headline" required maxlength="100"><textarea id="announcementBody" placeholder="Announcement" required maxlength="1200"></textarea><select id="announcementCategory"><option>City announcement</option><option>Breaking news</option><option>Construction</option><option>Election</option><option>Emergency</option></select><button class="primary-button" type="submit">Publish</button></form>
+        </article>
+        <article class="panel">
+          <header><h3>Server controls</h3><i data-lucide="terminal-square"></i></header>
+          <form id="commandForm" class="form-stack"><select id="commandPreset"><option value="say City Hall announcement incoming.">Broadcast notice</option><option value="save hold">Hold world save</option><option value="save resume">Resume world save</option><option value="weather clear">Clear weather</option><option value="">Custom command</option></select><input id="serverCommand" placeholder="Minecraft command without /"><button class="danger-button" type="submit">Queue command</button></form>
+          <form id="broadcastForm" class="form-stack inline-form"><input id="broadcastText" placeholder="Broadcast message" maxlength="220"><button class="ghost-button" type="submit">Broadcast</button></form>
+        </article>
+        <article class="panel">
+          <header><h3>Network configuration</h3><i data-lucide="settings-2"></i></header>
+          <form id="configForm" class="form-stack"><label class="toggle-row"><span>Maintenance mode</span><input id="maintenanceMode" type="checkbox"></label><label class="toggle-row"><span>Public player locations</span><input id="publicLocations" type="checkbox" checked></label><label class="toggle-row"><span>Accept community forms</span><input id="acceptForms" type="checkbox" checked></label><input id="mapRenderUrl" placeholder="BlueMap / map renderer URL"><button class="primary-button" type="submit">Save configuration</button></form>
+        </article>
+        <article class="panel">
+          <header><h3>Backup controls</h3><i data-lucide="database-backup"></i></header>
+          <p>Creates a timestamped JSON export on the Linux bridge.</p><button class="primary-button" id="backupButton"><i data-lucide="archive"></i> Run backup now</button><div class="record-list" id="backupList"></div>
+        </article>
+        <article class="panel span-2">
+          <header><h3>Player lookup and moderation</h3><i data-lucide="user-round-search"></i></header>
+          <form id="playerLookupForm" class="form-stack inline-form"><input id="playerLookup" placeholder="Player name"><button class="ghost-button" type="submit">Search</button></form>
+          <div class="record-list" id="playerLookupResults"></div>
+          <form id="playerActionForm" class="form-stack moderation-form">
+            <input id="actionPlayer" placeholder="Exact player name" required>
+            <select id="playerAction"><option value="warn">Warn</option><option value="kick">Kick</option><option value="ban">Ban</option><option value="unban">Unban</option><option value="teleport">Teleport to player</option></select>
+            <input id="actionDestination" class="hidden" placeholder="Destination player">
+            <input id="actionReason" placeholder="Reason or staff note" maxlength="200">
+            <button class="danger-button" type="submit">Apply action</button>
+          </form>
+        </article>
+        <article class="panel span-2">
+          <header><h3>Publish civic record</h3><i data-lucide="file-plus-2"></i></header>
+          <form id="publicRecordForm" class="form-stack">
+            <select id="recordCollection"><option value="events">Event calendar</option><option value="transit">Transit update</option><option value="roads">Road update</option><option value="airports">Airport schedule</option><option value="construction">Construction project</option><option value="permits">Building permit</option><option value="elections">Election or vote</option><option value="laws">Law or public code</option><option value="timeline">Historical timeline</option></select>
+            <input id="recordTitle" placeholder="Title" maxlength="100" required>
+            <textarea id="recordDetail" placeholder="Public details" maxlength="700"></textarea>
+            <input id="recordMeta" placeholder="Date, status, or short label" maxlength="100">
+            <button class="primary-button" type="submit">Publish record</button>
+          </form>
+        </article>
+        <article class="panel span-2">
+          <header><h3>Live city analytics</h3><i data-lucide="chart-no-axes-combined"></i></header>
+          <div class="analytics-strip" id="adminAnalytics"></div>
+        </article>
+        <article class="panel span-2">
+          <header><h3>Community reports and appeals</h3><i data-lucide="inbox"></i></header>
+          <div class="record-list" id="reportsList"></div>
+        </article>
+        <article class="panel span-2">
+          <header><h3>Recent server activity</h3><i data-lucide="scroll-text"></i></header>
+          <div class="record-list" id="activityList"></div>
+        </article>
+      </div>
+      <div class="toast" id="adminToast"></div>
+    </section>
+  </main>
+  <script type="module" src="./admin.js"></script>
+</body>
+</html>
