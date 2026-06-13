@@ -48,6 +48,13 @@ const formatTime = (value) => value ? new Date(value).toLocaleString([], { dateS
 const empty = (label) => `<div class="empty">${esc(label)}</div>`;
 const record = (title, detail = "", meta = "") => `<div class="record"><div><strong>${esc(title)}</strong><small>${esc(detail)}</small></div><em>${esc(meta)}</em></div>`;
 
+function accountEmail(name) {
+  const normalized = String(name || "").trim().toLowerCase();
+  if (!normalized || normalized.length > 40) throw new Error("Enter your Minecraft player name.");
+  const bytes = new TextEncoder().encode(normalized);
+  return `mc-${[...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join("")}@smp.com`;
+}
+
 function activateView(name) {
   const target = document.querySelector(`.view[data-page="${name}"]`) ? name : "overview";
   $$(".view").forEach((view) => view.classList.toggle("active", view.dataset.page === target));
@@ -72,11 +79,14 @@ function normalizedPublic() {
 function renderStatus() {
   const status = state.status || {};
   const online = status.online === true && Date.now() - Number(status.updatedAt || 0) < 90000;
+  const uptimeSeconds = status.lastRestart
+    ? Math.max(0, Math.floor((Date.now() - Number(status.lastRestart)) / 1000))
+    : Number(status.uptimeSeconds || 0);
   $("#statusDot").className = `status-dot ${online ? "online" : "offline"}`;
   $("#serverState").textContent = online ? "Server online" : "Server offline";
   $("#onlineCount").textContent = Number(status.playerCount || values(state.livePlayers).length);
   $("#capacityText").textContent = `of ${Number(status.maxPlayers || 30)} players`;
-  $("#uptimeText").textContent = status.uptimeSeconds ? `${Math.floor(status.uptimeSeconds / 3600)}h ${Math.floor(status.uptimeSeconds % 3600 / 60)}m` : "--";
+  $("#uptimeText").textContent = uptimeSeconds ? `${Math.floor(uptimeSeconds / 3600)}h ${Math.floor(uptimeSeconds % 3600 / 60)}m` : "--";
   $("#restartText").textContent = status.lastRestart ? `Restarted ${formatTime(status.lastRestart)}` : "waiting for bridge";
   $("#tpsText").textContent = `${Number(status.tps || 0).toFixed(1)} TPS`;
   $("#memoryText").textContent = status.ram?.used ? `${status.ram.used} / ${status.ram.total} RAM` : "server telemetry";
@@ -211,8 +221,9 @@ onValue(ref(db, "public/playerProfiles"), (snapshot) => { state.players = snapsh
 onValue(ref(db, "public"), (snapshot) => { state.public = snapshot.val() || {}; renderAll(); });
 onAuthStateChanged(auth, (user) => {
   state.user = user;
-  $("#requestResult").textContent = user ? `Signed in as ${user.email}` : "Sign in is required before submission.";
-  $("#citizenAuthResult").textContent = user ? `Signed in as ${user.email}` : "Sign in with your Gridlock account to submit forms.";
+  const identity = user?.displayName || user?.email || "";
+  $("#requestResult").textContent = user ? `Signed in as ${identity}` : "Sign in is required before submission.";
+  $("#citizenAuthResult").textContent = user ? `Signed in as ${identity}` : "Use the name and password you registered in Minecraft.";
   $("#citizenLogoutButton").classList.toggle("hidden", !user);
   $("#citizenLoginForm").classList.toggle("signed-in", Boolean(user));
 });
@@ -227,7 +238,7 @@ $("#citizenLoginForm").addEventListener("submit", async (event) => {
   if (state.user) return;
   $("#citizenAuthResult").textContent = "Signing in...";
   try {
-    await signInWithEmailAndPassword(auth, $("#citizenEmail").value.trim(), $("#citizenPassword").value);
+    await signInWithEmailAndPassword(auth, accountEmail($("#citizenName").value), $("#citizenPassword").value);
     $("#citizenPassword").value = "";
   } catch (error) {
     $("#citizenAuthResult").textContent = error.message.replace("Firebase: ", "");
@@ -243,6 +254,9 @@ $("#communityForm").addEventListener("submit", async (event) => {
   $("#requestResult").textContent = "Submitted to City Hall.";
 });
 
-setInterval(() => { $("#worldClock").textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); }, 1000);
+setInterval(() => {
+  $("#worldClock").textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  renderStatus();
+}, 1000);
 activateView(location.hash.slice(1) || "overview");
 renderAll();

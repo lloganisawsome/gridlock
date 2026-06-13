@@ -137,10 +137,10 @@
             <article class="panel">
               <header><h3>Citizen account</h3><i data-lucide="circle-user-round"></i></header>
               <form id="citizenLoginForm" class="form-stack">
-                <input id="citizenEmail" type="email" autocomplete="username" placeholder="Email" required>
+                <input id="citizenName" type="text" autocomplete="username" placeholder="Minecraft name" maxlength="40" required>
                 <input id="citizenPassword" type="password" autocomplete="current-password" placeholder="Password" required>
                 <div class="button-row"><button class="primary-button" type="submit">Sign in</button><button class="ghost-button hidden" id="citizenLogoutButton" type="button">Sign out</button></div>
-                <p class="form-note" id="citizenAuthResult">Sign in with your Gridlock account to submit forms.</p>
+                <p class="form-note" id="citizenAuthResult">Use the name and password you registered in Minecraft.</p>
               </form>
             </article>
             <article class="panel"><header><h3>Upcoming events</h3><i data-lucide="calendar-heart"></i></header><div id="eventList" class="record-list"></div></article>
