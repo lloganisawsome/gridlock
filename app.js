@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signInWithCustomToken, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 import { getDatabase, onValue, push, ref, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 import { getMessaging, getToken, isSupported, onMessage } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-messaging.js";
 import { API_BASE, firebaseConfig, MAP_RENDER_URL, WEB_PUSH_PUBLIC_KEY } from "./firebase-config.js";
@@ -86,6 +86,13 @@ function accountEmail(name) {
   if (!normalized || normalized.length > 40) throw new Error("Enter your Minecraft player name.");
   const bytes = new TextEncoder().encode(normalized);
   return `mc-${[...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join("")}@smp.com`;
+}
+
+function authMessage(error) {
+  return String(error?.message || error || "Something went wrong.")
+    .replace(/^Firebase:\s*/i, "")
+    .replace(/\s*\(auth\/[^)]+\)\.?$/, "")
+    .trim();
 }
 
 function activateView(name) {
@@ -320,10 +327,18 @@ $("#citizenLoginForm").addEventListener("submit", async (event) => {
   if (state.user) return;
   $("#citizenAuthResult").textContent = "Signing in...";
   try {
-    await signInWithEmailAndPassword(auth, accountEmail($("#citizenName").value), $("#citizenPassword").value);
+    const result = await publicApi("/api/citizen/login", {
+      method: "POST",
+      body: JSON.stringify({
+        minecraftName: $("#citizenName").value.trim(),
+        password: $("#citizenPassword").value
+      })
+    });
+    await signInWithCustomToken(auth, result.customToken);
     $("#citizenPassword").value = "";
+    $("#citizenAuthResult").textContent = "Signed in.";
   } catch (error) {
-    $("#citizenAuthResult").textContent = error.message.replace("Firebase: ", "");
+    $("#citizenAuthResult").textContent = authMessage(error);
   }
 });
 $("#citizenLogoutButton").addEventListener("click", () => signOut(auth));
@@ -332,15 +347,17 @@ $("#createCitizenAccountButton").addEventListener("click", async () => {
   const password = $("#citizenPassword").value;
   $("#citizenAuthResult").textContent = "Creating account...";
   try {
-    await publicApi("/api/citizen/register", {
+    const result = await publicApi("/api/citizen/register", {
       method: "POST",
       body: JSON.stringify({ minecraftName, password })
     });
-    await signInWithEmailAndPassword(auth, accountEmail(minecraftName), password);
+    await signInWithCustomToken(auth, result.customToken);
     $("#citizenPassword").value = "";
-    $("#citizenAuthResult").textContent = "Account created and signed in.";
+    $("#citizenAuthResult").textContent = result.alreadyRegistered
+      ? "Website password saved and signed in."
+      : "Account created and signed in.";
   } catch (error) {
-    $("#citizenAuthResult").textContent = error.message;
+    $("#citizenAuthResult").textContent = authMessage(error);
   }
 });
 $("#communityForm").addEventListener("submit", async (event) => {
