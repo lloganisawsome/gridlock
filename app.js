@@ -68,6 +68,19 @@ async function api(path, options = {}) {
   return result;
 }
 
+async function publicApi(path, options = {}) {
+  const response = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    }
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result.error || `Request failed (${response.status})`);
+  return result;
+}
+
 function accountEmail(name) {
   const normalized = String(name || "").trim().toLowerCase();
   if (!normalized || normalized.length > 40) throw new Error("Enter your Minecraft player name.");
@@ -284,6 +297,7 @@ onAuthStateChanged(auth, (user) => {
   $("#requestResult").textContent = user ? `Signed in as ${identity}` : "Sign in is required before submission.";
   $("#citizenAuthResult").textContent = user ? `Signed in as ${identity}` : "Use the name and password you registered in Minecraft.";
   $("#citizenLogoutButton").classList.toggle("hidden", !user);
+  $("#createCitizenAccountButton").classList.toggle("hidden", Boolean(user));
   $("#citizenLoginForm").classList.toggle("signed-in", Boolean(user));
   $("#pushSubscribeButton").classList.toggle("hidden", false);
   if (!user) {
@@ -313,6 +327,22 @@ $("#citizenLoginForm").addEventListener("submit", async (event) => {
   }
 });
 $("#citizenLogoutButton").addEventListener("click", () => signOut(auth));
+$("#createCitizenAccountButton").addEventListener("click", async () => {
+  const minecraftName = $("#citizenName").value.trim();
+  const password = $("#citizenPassword").value;
+  $("#citizenAuthResult").textContent = "Creating account...";
+  try {
+    await publicApi("/api/citizen/register", {
+      method: "POST",
+      body: JSON.stringify({ minecraftName, password })
+    });
+    await signInWithEmailAndPassword(auth, accountEmail(minecraftName), password);
+    $("#citizenPassword").value = "";
+    $("#citizenAuthResult").textContent = "Account created and signed in.";
+  } catch (error) {
+    $("#citizenAuthResult").textContent = error.message;
+  }
+});
 $("#communityForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!state.user) { $("#requestResult").textContent = "Please sign in with your citizen account first."; return; }
