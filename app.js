@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 import { getDatabase, onValue, push, ref, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
-import { firebaseConfig, MAP_RENDER_URL } from "./firebase-config.js";
+import { API_BASE, firebaseConfig, MAP_RENDER_URL } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
@@ -11,6 +11,8 @@ const state = {
   players: {},
   public: {},
   livePlayers: {},
+  bulletins: {},
+  civicChat: {},
   user: null,
   mapLayer: "players",
   mapZoom: 1
@@ -47,6 +49,22 @@ const money = (value) => `$${Math.floor(Number(value) || 0).toLocaleString("en-U
 const formatTime = (value) => value ? new Date(value).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "Not recorded";
 const empty = (label) => `<div class="empty">${esc(label)}</div>`;
 const record = (title, detail = "", meta = "") => `<div class="record"><div><strong>${esc(title)}</strong><small>${esc(detail)}</small></div><em>${esc(meta)}</em></div>`;
+
+async function api(path, options = {}) {
+  if (!state.user) throw new Error("Sign in first.");
+  const token = await state.user.getIdToken();
+  const response = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      ...(options.headers || {})
+    }
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result.error || `Request failed (${response.status})`);
+  return result;
+}
 
 function accountEmail(name) {
   const normalized = String(name || "").trim().toLowerCase();
@@ -194,6 +212,17 @@ function renderRecords() {
     node.innerHTML = values(data.dispatches).filter((item) => item.type === type).slice(-12).reverse().map((item) => record(item.reason || item.summary || "Dispatch", item.subject || item.locationName, item.status)).join("") || empty(`No ${type.toUpperCase()} incidents.`);
   }
   $("#eventList").innerHTML = data.events.map((item) => record(item.title, item.location, item.date)).join("");
+  $("#bulletinList").innerHTML = values(state.bulletins)
+    .filter((item) => item.moderationState !== "removed")
+    .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))
+    .slice(0, 12)
+    .map((item) => record(item.category || "Community", item.content, `${item.author || "Unknown"} · ${item.source || "web"}`))
+    .join("") || empty("No Civic Network bulletins yet.");
+  $("#civicChatList").innerHTML = values(state.civicChat)
+    .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))
+    .slice(0, 16)
+    .map((item) => record(item.author || item.minecraftName || "Unknown", item.message, item.source || "web"))
+    .join("") || empty("No Civic chat messages yet.");
   const activeIncidents = values(data.dispatches).filter((item) => !String(item.status || "").startsWith("closed")).length;
   const activeWarrants = values(data.warrants).filter((item) => item.status === "active").length;
   $("#dailyActive").textContent = profiles.filter((item) => item.online).length;
@@ -219,6 +248,8 @@ onValue(ref(db, "serverStatus"), (snapshot) => { state.status = snapshot.val() |
 onValue(ref(db, "livePlayers"), (snapshot) => { state.livePlayers = snapshot.val() || {}; renderAll(); });
 onValue(ref(db, "public/playerProfiles"), (snapshot) => { state.players = snapshot.val() || {}; renderAll(); });
 onValue(ref(db, "public"), (snapshot) => { state.public = snapshot.val() || {}; renderAll(); });
+onValue(ref(db, "public/bulletins"), (snapshot) => { state.bulletins = snapshot.val() || {}; renderAll(); });
+onValue(ref(db, "public/civicChat"), (snapshot) => { state.civicChat = snapshot.val() || {}; renderAll(); });
 onAuthStateChanged(auth, (user) => {
   state.user = user;
   const identity = user?.displayName || user?.email || "";
@@ -252,6 +283,49 @@ $("#communityForm").addEventListener("submit", async (event) => {
   await push(ref(db, "communitySubmissions"), { uid: state.user.uid, email: state.user.email, type: $("#requestType").value, subject: $("#requestSubject").value.trim(), body: $("#requestBody").value.trim(), status: "open", createdAt: serverTimestamp() });
   event.target.reset();
   $("#requestResult").textContent = "Submitted to City Hall.";
+});
+
+$("#linkCodeButton").addEventListener("click", async () => {
+  if (!state.user) { $("#linkCodeResult").textContent = "Sign in first."; return; }
+  $("#linkCodeResult").textContent = "Creating link code...";
+  try {
+    const result = await api("/api/citizen/link-code", { method: "POST", body: JSON.stringify({}) });
+    $("#linkCodeResult").textContent = `Use code ${result.code} in-game: Gridlock Connect > Property + city > Link website account. Expires ${formatTime(result.expiresAt)}.`;
+  } catch (error) {
+    $("#linkCodeResult").textContent = error.message;
+  }
+});
+
+$("#bulletinForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!state.user) { $("#bulletinResult").textContent = "Sign in first."; return; }
+  $("#bulletinResult").textContent = "Posting...";
+  try {
+    await api("/api/citizen/bulletins", {
+      method: "POST",
+      body: JSON.stringify({ category: $("#bulletinCategory").value, content: $("#bulletinContent").value.trim() })
+    });
+    event.target.reset();
+    $("#bulletinResult").textContent = "Posted to the Civic Network.";
+  } catch (error) {
+    $("#bulletinResult").textContent = error.message;
+  }
+});
+
+$("#civicChatForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!state.user) { $("#civicChatResult").textContent = "Sign in first."; return; }
+  $("#civicChatResult").textContent = "Sending...";
+  try {
+    await api("/api/citizen/chat", {
+      method: "POST",
+      body: JSON.stringify({ message: $("#civicChatMessage").value.trim() })
+    });
+    event.target.reset();
+    $("#civicChatResult").textContent = "Sent to website and Minecraft.";
+  } catch (error) {
+    $("#civicChatResult").textContent = error.message;
+  }
 });
 
 setInterval(() => {

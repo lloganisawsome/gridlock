@@ -142,9 +142,15 @@
                 <div class="button-row"><button class="primary-button" type="submit">Sign in</button><button class="ghost-button hidden" id="citizenLogoutButton" type="button">Sign out</button></div>
                 <p class="form-note" id="citizenAuthResult">Use the name and password you registered in Minecraft.</p>
               </form>
+              <div class="form-stack inset-stack">
+                <button class="ghost-button" id="linkCodeButton" type="button">Create Minecraft link code</button>
+                <p class="form-note" id="linkCodeResult">Link codes verify the player from inside Gridlock.</p>
+              </div>
             </article>
             <article class="panel"><header><h3>Upcoming events</h3><i data-lucide="calendar-heart"></i></header><div id="eventList" class="record-list"></div></article>
             <article class="panel span-2"><header><h3>Submit a request</h3><i data-lucide="send"></i></header><form id="communityForm" class="form-stack"><select id="requestType"><option>Suggestion</option><option>Bug report</option><option>Player report</option><option>Appeal</option></select><input id="requestSubject" placeholder="Subject" maxlength="80" required><textarea id="requestBody" placeholder="Tell us what happened" maxlength="1500" required></textarea><button class="primary-button" type="submit">Submit to staff</button><p class="form-note" id="requestResult">Sign in is required before submission.</p></form></article>
+            <article class="panel span-2"><header><h3>Civic bulletin board</h3><i data-lucide="clipboard-list"></i></header><div id="bulletinList" class="record-list"></div><form id="bulletinForm" class="form-stack inline-form"><select id="bulletinCategory"><option>Community</option><option>Business</option><option>Event</option><option>Public safety</option><option>Government</option></select><input id="bulletinContent" placeholder="Post a public bulletin" maxlength="600" required><button class="ghost-button" type="submit">Post</button></form><p class="form-note" id="bulletinResult">Website and in-game posts share this board.</p></article>
+            <article class="panel span-2"><header><h3>Civic chat</h3><i data-lucide="messages-square"></i></header><div id="civicChatList" class="record-list"></div><form id="civicChatForm" class="form-stack inline-form"><input id="civicChatMessage" placeholder="Send to Civic chat and Minecraft" maxlength="240" required><button class="primary-button" type="submit">Send</button></form><p class="form-note" id="civicChatResult">Messages are rate-limited and labeled by source.</p></article>
           </div>
         </div>
       </div>

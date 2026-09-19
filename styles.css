@@ -152,6 +152,7 @@ textarea { min-height: 112px; padding: 11px 12px; resize: vertical; }
 input:focus, textarea:focus, select:focus { border-color: #6e7884; box-shadow: 0 0 0 2px rgba(95,108,122,.13); }
 .form-stack { display: grid; gap: 10px; }
 .form-stack label { display: grid; gap: 7px; color: #aeb5be; font-size: 10px; font-weight: 750; }
+.inset-stack { margin-top: 12px; padding-top: 12px; border-top: 1px solid #252b33; }
 .form-note { margin: 2px 0 0; color: var(--muted); font-size: 10px; }
 .button-row { display: flex; gap: 9px; }
 .large-metric { display: block; margin: 9px 0 2px; font-size: 30px; }
