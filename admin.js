@@ -143,9 +143,9 @@ onValue(ref(db, "serverStatus"), (snapshot) => {
 $("#announcementForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   try {
-    await api("/api/admin/announcement", { method: "POST", body: JSON.stringify({ title: $("#announcementTitle").value, body: $("#announcementBody").value, category: $("#announcementCategory").value }) });
+    const result = await api("/api/admin/announcement", { method: "POST", body: JSON.stringify({ title: $("#announcementTitle").value, body: $("#announcementBody").value, category: $("#announcementCategory").value, push: $("#announcementPush").checked }) });
     event.target.reset();
-    toast("Announcement published.");
+    toast(result.push ? `Announcement published. Push sent to ${result.push.sent}.` : "Announcement published.");
   } catch (error) { toast(error.message); }
 });
 
@@ -250,6 +250,55 @@ $("#publicRecordForm").addEventListener("submit", async (event) => {
     });
     event.target.reset();
     toast("Public record published.");
+  } catch (error) { toast(error.message); }
+});
+
+$("#officeRoleForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  try {
+    await api("/api/admin/offices", { method: "POST", body: JSON.stringify({ office: $("#officeName").value, holder: $("#officeHolder").value }) });
+    event.target.reset();
+    toast("Office role saved.");
+  } catch (error) { toast(error.message); }
+});
+
+$("#courtCaseForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  try {
+    await api("/api/admin/court-case", {
+      method: "POST",
+      body: JSON.stringify({
+        title: $("#courtTitle").value,
+        plaintiff: $("#courtPlaintiff").value,
+        defendant: $("#courtDefendant").value,
+        charge: $("#courtCharge").value,
+        date: $("#courtDate").value,
+        status: $("#courtStatus").value,
+        judge: $("#courtJudge").value,
+        summary: $("#courtSummary").value
+      })
+    });
+    event.target.reset();
+    toast("Court calendar saved.");
+  } catch (error) { toast(error.message); }
+});
+
+$("#propertyForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  try {
+    await api("/api/admin/property", {
+      method: "POST",
+      body: JSON.stringify({
+        name: $("#propertyName").value,
+        owner: $("#propertyOwner").value,
+        type: $("#propertyType").value,
+        location: $("#propertyLocation").value,
+        value: $("#propertyValue").value,
+        status: $("#propertyStatus").value
+      })
+    });
+    event.target.reset();
+    toast("Property assignment saved.");
   } catch (error) { toast(error.message); }
 });
 

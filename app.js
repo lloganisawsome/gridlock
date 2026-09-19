@@ -1,11 +1,13 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 import { getDatabase, onValue, push, ref, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
-import { API_BASE, firebaseConfig, MAP_RENDER_URL } from "./firebase-config.js";
+import { getMessaging, getToken, isSupported, onMessage } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-messaging.js";
+import { API_BASE, firebaseConfig, MAP_RENDER_URL, WEB_PUSH_PUBLIC_KEY } from "./firebase-config.js";
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
+const messagingReady = isSupported().then((supported) => supported ? getMessaging(app) : null).catch(() => null);
 const state = {
   status: {},
   players: {},
@@ -283,6 +285,7 @@ onAuthStateChanged(auth, (user) => {
   $("#citizenAuthResult").textContent = user ? `Signed in as ${identity}` : "Use the name and password you registered in Minecraft.";
   $("#citizenLogoutButton").classList.toggle("hidden", !user);
   $("#citizenLoginForm").classList.toggle("signed-in", Boolean(user));
+  $("#pushSubscribeButton").classList.toggle("hidden", !user);
 });
 
 $$("[data-view]").forEach((button) => button.addEventListener("click", (event) => { if (button.tagName === "A" && !button.dataset.view) return; event.preventDefault(); activateView(button.dataset.view); }));
@@ -322,6 +325,37 @@ $("#linkCodeButton").addEventListener("click", async () => {
   }
 });
 
+$("#pushSubscribeButton").addEventListener("click", async () => {
+  if (!state.user) { $("#pushSubscribeResult").textContent = "Sign in first."; return; }
+  $("#pushSubscribeResult").textContent = "Requesting notification access...";
+  try {
+    if (!("serviceWorker" in navigator) || !("Notification" in window)) throw new Error("This browser does not support web push.");
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") throw new Error("Notifications were not allowed.");
+    const messaging = await messagingReady;
+    if (!messaging) throw new Error("Firebase Messaging is not supported in this browser.");
+    const registration = await navigator.serviceWorker.register("./firebase-messaging-sw.js");
+    const token = await getToken(messaging, { vapidKey: WEB_PUSH_PUBLIC_KEY, serviceWorkerRegistration: registration });
+    if (!token) throw new Error("Firebase did not return a push token.");
+    await api("/api/citizen/push-subscription", {
+      method: "POST",
+      body: JSON.stringify({ token, userAgent: navigator.userAgent })
+    });
+    $("#pushSubscribeResult").textContent = "Announcement alerts enabled on this device.";
+  } catch (error) {
+    $("#pushSubscribeResult").textContent = error.message;
+  }
+});
+
+messagingReady.then((messaging) => {
+  if (!messaging) return;
+  onMessage(messaging, (payload) => {
+    const title = payload.notification?.title || "Gridlock announcement";
+    const body = payload.notification?.body || "";
+    $("#tickerTrack").textContent = `GRIDLOCK ALERT · ${title} · ${body}`;
+  });
+});
+
 $("#bulletinForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!state.user) { $("#bulletinResult").textContent = "Sign in first."; return; }
@@ -348,7 +382,7 @@ $("#civicChatForm").addEventListener("submit", async (event) => {
       body: JSON.stringify({ message: $("#civicChatMessage").value.trim() })
     });
     event.target.reset();
-    $("#civicChatResult").textContent = "Sent to website and Minecraft.";
+    $("#civicChatResult").textContent = "Sent.";
   } catch (error) {
     $("#civicChatResult").textContent = error.message;
   }

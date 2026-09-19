@@ -34,7 +34,7 @@
       <div class="admin-grid">
         <article class="panel">
           <header><h3>City announcement</h3><i data-lucide="megaphone"></i></header>
-          <form id="announcementForm" class="form-stack"><input id="announcementTitle" placeholder="Headline" required maxlength="100"><textarea id="announcementBody" placeholder="Announcement" required maxlength="1200"></textarea><select id="announcementCategory"><option>City announcement</option><option>Breaking news</option><option>Construction</option><option>Election</option><option>Emergency</option></select><button class="primary-button" type="submit">Publish</button></form>
+          <form id="announcementForm" class="form-stack"><input id="announcementTitle" placeholder="Headline" required maxlength="100"><textarea id="announcementBody" placeholder="Announcement" required maxlength="1200"></textarea><select id="announcementCategory"><option>City announcement</option><option>Breaking news</option><option>Construction</option><option>Election</option><option>Emergency</option></select><label class="toggle-row"><span>Push to devices</span><input id="announcementPush" type="checkbox"></label><button class="primary-button" type="submit">Publish</button></form>
         </article>
         <article class="panel">
           <header><h3>Server controls</h3><i data-lucide="terminal-square"></i></header>
@@ -81,6 +81,18 @@
             <input id="recordMeta" placeholder="Date, status, or short label" maxlength="100">
             <button class="primary-button" type="submit">Publish record</button>
           </form>
+        </article>
+        <article class="panel">
+          <header><h3>Office roles</h3><i data-lucide="landmark"></i></header>
+          <form id="officeRoleForm" class="form-stack"><input id="officeName" placeholder="Office, e.g. President" maxlength="80" required><input id="officeHolder" placeholder="Holder / player name" maxlength="80" required><button class="primary-button" type="submit">Set office</button></form>
+        </article>
+        <article class="panel">
+          <header><h3>Court calendar</h3><i data-lucide="calendar-days"></i></header>
+          <form id="courtCaseForm" class="form-stack"><input id="courtTitle" placeholder="Case title" maxlength="120"><input id="courtPlaintiff" placeholder="Plaintiff" maxlength="80"><input id="courtDefendant" placeholder="Defendant" maxlength="80"><input id="courtCharge" placeholder="Charge / issue" maxlength="160"><input id="courtDate" placeholder="Date/time" maxlength="80"><select id="courtStatus"><option value="scheduled">Scheduled</option><option value="active">Active</option><option value="continued">Continued</option><option value="closed">Closed</option></select><input id="courtJudge" placeholder="Judge" maxlength="80"><textarea id="courtSummary" placeholder="Notes / summary" maxlength="700"></textarea><button class="primary-button" type="submit">Save court date</button></form>
+        </article>
+        <article class="panel span-2">
+          <header><h3>Property assignment</h3><i data-lucide="home"></i></header>
+          <form id="propertyForm" class="form-stack"><input id="propertyName" placeholder="Property name" maxlength="100" required><input id="propertyOwner" placeholder="Owner player name" maxlength="40" required><input id="propertyType" placeholder="Type, e.g. House, Business, Plot" maxlength="60"><input id="propertyLocation" placeholder="Location / coordinates" maxlength="120"><input id="propertyValue" type="number" min="0" step="1" placeholder="Value"><select id="propertyStatus"><option>Registered</option><option>For sale</option><option>Rented</option><option>Government hold</option></select><button class="primary-button" type="submit">Save property</button></form>
         </article>
         <article class="panel span-2">
           <header><h3>Live city analytics</h3><i data-lucide="chart-no-axes-combined"></i></header>

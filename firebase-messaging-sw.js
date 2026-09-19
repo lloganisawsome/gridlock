@@ -1,4 +1,7 @@
-export const firebaseConfig = {
+importScripts("https://www.gstatic.com/firebasejs/11.9.1/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/11.9.1/firebase-messaging-compat.js");
+
+firebase.initializeApp({
   apiKey: "AIzaSyBuh1-WqmnkWabIEmtBkArfGR-IgtslbPc",
   authDomain: "logansprojects-48f2a.firebaseapp.com",
   databaseURL: "https://logansprojects-48f2a-default-rtdb.firebaseio.com",
@@ -6,9 +9,6 @@ export const firebaseConfig = {
   storageBucket: "logansprojects-48f2a.firebasestorage.app",
   messagingSenderId: "238247393380",
   appId: "1:238247393380:web:ebac37e20fb1650af20771"
-};
+});
 
-// HTTPS bridge used by GitHub Pages.
-export const API_BASE = "https://blackbox.tailc5e5d1.ts.net:10000";
-export const MAP_RENDER_URL = "https://blackbox.tailc5e5d1.ts.net:10000/map/";
-export const WEB_PUSH_PUBLIC_KEY = "BLQ2njMDK2bdJ9ezO1zTPOY45IUCZQbABb0bVHQssqlvDJjR7pX96OqVwCBso0G2eusmTwp6H8WHOH1np0qohVo";
+firebase.messaging();
