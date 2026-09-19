@@ -74,10 +74,12 @@ function accountEmail(name) {
 }
 
 function activateView(name) {
-  const target = document.querySelector(`.view[data-page="${name}"]`) ? name : "overview";
+  const requested = String(name || "overview");
+  const targetName = requested === "chat" ? "community" : requested;
+  const target = document.querySelector(`.view[data-page="${targetName}"]`) ? targetName : "overview";
   $$(".view").forEach((view) => view.classList.toggle("active", view.dataset.page === target));
-  $$("[data-view]").forEach((button) => button.classList.toggle("active", button.dataset.view === target));
-  history.replaceState(null, "", `#${target}`);
+  $$("[data-view]").forEach((button) => button.classList.toggle("active", button.dataset.view === requested));
+  history.replaceState(null, "", `#${requested}`);
   window.scrollTo({ top: target === "overview" ? 0 : document.querySelector(".workspace").offsetTop, behavior: "smooth" });
   if (target === "map") renderMap();
 }

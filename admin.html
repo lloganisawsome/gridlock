@@ -45,6 +45,17 @@
           <header><h3>Network configuration</h3><i data-lucide="settings-2"></i></header>
           <form id="configForm" class="form-stack"><label class="toggle-row"><span>Maintenance mode</span><input id="maintenanceMode" type="checkbox"></label><label class="toggle-row"><span>Public player locations</span><input id="publicLocations" type="checkbox" checked></label><label class="toggle-row"><span>Accept community forms</span><input id="acceptForms" type="checkbox" checked></label><input id="mapRenderUrl" placeholder="BlueMap / map renderer URL"><button class="primary-button" type="submit">Save configuration</button></form>
         </article>
+        <article class="panel" id="staffAccessPanel">
+          <header><h3>Staff access</h3><i data-lucide="shield-plus"></i></header>
+          <div class="record-list" id="staffList"></div>
+          <form id="staffForm" class="form-stack">
+            <select id="staffTargetType"><option value="email">Firebase email</option><option value="player">Minecraft/player name</option></select>
+            <input id="staffTarget" placeholder="user@example.com or player name" maxlength="120" required>
+            <select id="staffRole"><option value="staff">Staff</option><option value="admin">Admin</option><option value="owner">Owner</option><option value="none">Remove access</option></select>
+            <button class="primary-button" type="submit">Update access</button>
+            <p class="form-note" id="staffResult">Only the Gridlock owner can change staff roles.</p>
+          </form>
+        </article>
         <article class="panel">
           <header><h3>Backup controls</h3><i data-lucide="database-backup"></i></header>
           <p>Creates a timestamped JSON export on the Linux bridge.</p><button class="primary-button" id="backupButton"><i data-lucide="archive"></i> Run backup now</button><div class="record-list" id="backupList"></div>

@@ -10,6 +10,7 @@ const $ = (selector) => document.querySelector(selector);
 const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[character]));
 const values = (object) => Object.values(object || {});
 const formatTime = (value) => value ? new Date(value).toLocaleString([], { dateStyle: "short", timeStyle: "short" }) : "Never";
+const ownerEmails = new Set(["loganstatham76@gmail.com"]);
 let currentUser;
 let currentClaims;
 let toastTimer;
@@ -42,6 +43,27 @@ function record(title, detail, meta) {
 
 function reportRecord(item) {
   return `<div class="record action-record"><div><strong>${esc(item.subject || item.type)}</strong><small>${esc(`${item.type}: ${item.body}`)}</small></div><div class="record-actions"><button data-report="${esc(item.id)}" data-status="in_progress">Claim</button><button data-report="${esc(item.id)}" data-status="resolved">Resolve</button><button data-report="${esc(item.id)}" data-status="dismissed">Dismiss</button></div></div>`;
+}
+
+function isOwner() {
+  return Boolean(currentClaims?.claims?.owner) || ownerEmails.has(String(currentUser?.email || "").toLowerCase());
+}
+
+function roleName(role) {
+  return role === "owner" ? "OWNER" : role === "admin" ? "ADMIN" : role === "staff" ? "STAFF" : "NONE";
+}
+
+function renderStaff(members = []) {
+  $("#staffList").innerHTML = members.length
+    ? members.map((member) => record(member.email || member.uid, member.minecraftName ? `Player: ${member.minecraftName}` : "Firebase account", roleName(member.role))).join("")
+    : '<div class="empty">No staff records yet.</div>';
+  $("#staffForm").classList.toggle("hidden", !isOwner());
+  $("#staffResult").textContent = isOwner() ? "Owner access active. Add staff by email or registered player name." : "Only the Gridlock owner can change staff roles.";
+}
+
+async function loadStaff() {
+  const staff = await api("/api/admin/staff");
+  renderStaff(staff.members || []);
 }
 
 async function loadOverview() {
@@ -95,16 +117,17 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
   currentClaims = await getIdTokenResult(user, true);
-  if (!currentClaims.claims.admin && !currentClaims.claims.staff) {
+  if (!currentClaims.claims.admin && !currentClaims.claims.staff && !isOwner()) {
     $("#loginResult").textContent = "This account is authenticated but has no Gridlock staff claim.";
     await signOut(auth);
     return;
   }
   $("#loginPanel").classList.add("hidden");
   $("#adminConsole").classList.remove("hidden");
-  $("#staffIdentity").textContent = `${user.email} · ${currentClaims.claims.admin ? "Administrator" : "Staff"}`;
+  $("#staffIdentity").textContent = `${user.email} · ${isOwner() ? "Owner" : currentClaims.claims.admin ? "Administrator" : "Staff"}`;
   try {
     await loadOverview();
+    await loadStaff();
   } catch (error) {
     toast(error.message);
   }
@@ -154,6 +177,26 @@ $("#configForm").addEventListener("submit", async (event) => {
     await api("/api/admin/config", { method: "POST", body: JSON.stringify({ maintenanceMode: $("#maintenanceMode").checked, publicLocations: $("#publicLocations").checked, acceptForms: $("#acceptForms").checked, mapRenderUrl: $("#mapRenderUrl").value.trim() }) });
     toast("Network configuration saved.");
   } catch (error) { toast(error.message); }
+});
+
+$("#staffForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const targetType = $("#staffTargetType").value;
+  const target = $("#staffTarget").value.trim();
+  const body = { role: $("#staffRole").value };
+  if (targetType === "email") body.email = target;
+  else body.minecraftName = target;
+  $("#staffResult").textContent = "Updating access...";
+  try {
+    await api("/api/admin/staff", { method: "POST", body: JSON.stringify(body) });
+    $("#staffTarget").value = "";
+    await loadStaff();
+    $("#staffResult").textContent = "Staff access updated. They may need to sign out and back in.";
+    toast("Staff access updated.");
+  } catch (error) {
+    $("#staffResult").textContent = error.message;
+    toast(error.message);
+  }
 });
 
 $("#backupButton").addEventListener("click", async () => {
