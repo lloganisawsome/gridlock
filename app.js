@@ -77,7 +77,7 @@ function accountEmail(name) {
 
 function activateView(name) {
   const requested = String(name || "overview");
-  const targetName = requested === "chat" ? "community" : requested;
+  const targetName = requested;
   const target = document.querySelector(`.view[data-page="${targetName}"]`) ? targetName : "overview";
   $$(".view").forEach((view) => view.classList.toggle("active", view.dataset.page === target));
   $$("[data-view]").forEach((button) => button.classList.toggle("active", button.dataset.view === requested));
@@ -285,7 +285,15 @@ onAuthStateChanged(auth, (user) => {
   $("#citizenAuthResult").textContent = user ? `Signed in as ${identity}` : "Use the name and password you registered in Minecraft.";
   $("#citizenLogoutButton").classList.toggle("hidden", !user);
   $("#citizenLoginForm").classList.toggle("signed-in", Boolean(user));
-  $("#pushSubscribeButton").classList.toggle("hidden", !user);
+  $("#pushSubscribeButton").classList.toggle("hidden", false);
+  if (!user) {
+    $("#pushSubscribeResult").textContent = "Sign in, then allow notifications so announcements can reach this device.";
+  } else if ("Notification" in window && Notification.permission === "granted") {
+    $("#pushSubscribeResult").textContent = "Notifications are already allowed on this device.";
+  } else {
+    $("#pushSubscribeResult").textContent = "Please click Enable announcement alerts and choose Allow when your browser asks.";
+    maybeAskForNotifications();
+  }
 });
 
 $$("[data-view]").forEach((button) => button.addEventListener("click", (event) => { if (button.tagName === "A" && !button.dataset.view) return; event.preventDefault(); activateView(button.dataset.view); }));
@@ -325,9 +333,9 @@ $("#linkCodeButton").addEventListener("click", async () => {
   }
 });
 
-$("#pushSubscribeButton").addEventListener("click", async () => {
+async function enablePushNotifications() {
   if (!state.user) { $("#pushSubscribeResult").textContent = "Sign in first."; return; }
-  $("#pushSubscribeResult").textContent = "Requesting notification access...";
+  $("#pushSubscribeResult").textContent = "Your browser is about to ask for notification permission. Choose Allow for Gridlock announcements.";
   try {
     if (!("serviceWorker" in navigator) || !("Notification" in window)) throw new Error("This browser does not support web push.");
     const permission = await Notification.requestPermission();
@@ -345,7 +353,20 @@ $("#pushSubscribeButton").addEventListener("click", async () => {
   } catch (error) {
     $("#pushSubscribeResult").textContent = error.message;
   }
-});
+}
+
+function maybeAskForNotifications() {
+  if (!state.user || !("Notification" in window) || Notification.permission !== "default") return;
+  if (localStorage.getItem("gridlockNotificationPrompted") === "1") return;
+  localStorage.setItem("gridlockNotificationPrompted", "1");
+  setTimeout(() => {
+    if (confirm("Allow Gridlock announcement notifications on this device?")) {
+      enablePushNotifications();
+    }
+  }, 600);
+}
+
+$("#pushSubscribeButton").addEventListener("click", enablePushNotifications);
 
 messagingReady.then((messaging) => {
   if (!messaging) return;

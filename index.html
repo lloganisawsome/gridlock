@@ -63,6 +63,7 @@
         <button class="rail-link" data-view="emergency"><i data-lucide="siren"></i><span>Emergency</span></button>
         <button class="rail-link" data-view="analytics"><i data-lucide="chart-spline"></i><span>City data</span></button>
         <button class="rail-link" data-view="chat"><i data-lucide="messages-square"></i><span>Chat</span></button>
+        <button class="rail-link" data-view="bulletin"><i data-lucide="clipboard-list"></i><span>Bulletin</span></button>
         <button class="rail-link" data-view="community"><i data-lucide="message-square-more"></i><span>Community</span></button>
         <a class="rail-link staff-link" href="./admin.html"><i data-lucide="shield-check"></i><span>Staff access</span></a>
       </aside>
@@ -132,6 +133,24 @@
             <article class="panel span-2"><header><h3>Laws and public code</h3><i data-lucide="book-open-check"></i></header><div id="lawsList" class="record-list"></div></article>
           </div>
         </div>
+        <div class="view" data-page="chat">
+          <div class="section-heading"><div><span class="kicker">LIVE CHAT</span><h2>Gridlock Chat</h2></div></div>
+          <article class="panel chat-panel">
+            <header><h3>Server chat</h3><i data-lucide="messages-square"></i></header>
+            <div id="civicChatList" class="record-list chat-list"></div>
+            <form id="civicChatForm" class="form-stack inline-form chat-form"><input id="civicChatMessage" placeholder="Send a chat message" maxlength="240" required><button class="primary-button" type="submit">Send</button></form>
+            <p class="form-note" id="civicChatResult">Sign in to chat. Messages are rate-limited.</p>
+          </article>
+        </div>
+        <div class="view" data-page="bulletin">
+          <div class="section-heading"><div><span class="kicker">COMMUNITY BULLETIN</span><h2>Bulletin Board</h2></div></div>
+          <article class="panel bulletin-panel">
+            <header><h3>Public posts</h3><i data-lucide="clipboard-list"></i></header>
+            <div id="bulletinList" class="record-list bulletin-list"></div>
+            <form id="bulletinForm" class="form-stack inline-form"><select id="bulletinCategory"><option>Community</option><option>Business</option><option>Event</option><option>Public safety</option><option>Government</option></select><input id="bulletinContent" placeholder="Post a public bulletin" maxlength="600" required><button class="ghost-button" type="submit">Post</button></form>
+            <p class="form-note" id="bulletinResult">Sign in to post a bulletin.</p>
+          </article>
+        </div>
         <div class="view" data-page="community">
           <div class="section-heading"><div><span class="kicker">COMMUNITY DESK</span><h2>Talk to City Hall</h2></div></div>
           <div class="split-grid">
@@ -152,8 +171,6 @@
             </article>
             <article class="panel"><header><h3>Upcoming events</h3><i data-lucide="calendar-heart"></i></header><div id="eventList" class="record-list"></div></article>
             <article class="panel span-2"><header><h3>Submit a request</h3><i data-lucide="send"></i></header><form id="communityForm" class="form-stack"><select id="requestType"><option>Suggestion</option><option>Bug report</option><option>Player report</option><option>Appeal</option></select><input id="requestSubject" placeholder="Subject" maxlength="80" required><textarea id="requestBody" placeholder="Tell us what happened" maxlength="1500" required></textarea><button class="primary-button" type="submit">Submit to staff</button><p class="form-note" id="requestResult">Sign in is required before submission.</p></form></article>
-            <article class="panel span-2"><header><h3>Civic bulletin board</h3><i data-lucide="clipboard-list"></i></header><div id="bulletinList" class="record-list"></div><form id="bulletinForm" class="form-stack inline-form"><select id="bulletinCategory"><option>Community</option><option>Business</option><option>Event</option><option>Public safety</option><option>Government</option></select><input id="bulletinContent" placeholder="Post a public bulletin" maxlength="600" required><button class="ghost-button" type="submit">Post</button></form><p class="form-note" id="bulletinResult">Website and in-game posts share this board.</p></article>
-            <article class="panel span-2"><header><h3>Chat</h3><i data-lucide="messages-square"></i></header><div id="civicChatList" class="record-list"></div><form id="civicChatForm" class="form-stack inline-form"><input id="civicChatMessage" placeholder="Send a chat message" maxlength="240" required><button class="primary-button" type="submit">Send</button></form><p class="form-note" id="civicChatResult">Messages are rate-limited.</p></article>
           </div>
         </div>
       </div>

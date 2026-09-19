@@ -128,6 +128,12 @@ svg { width: 18px; height: 18px; stroke-width: 1.8; }
 .segmented button.active { background: #292f36; color: white; }
 
 .record-list { display: grid; gap: 8px; }
+.chat-panel, .bulletin-panel { max-width: 980px; margin: 0 auto; }
+.chat-list { min-height: 520px; align-content: end; }
+.chat-list .record { grid-template-columns: 1fr; }
+.chat-list .record em { text-align: left; color: var(--red-bright); }
+.chat-form { position: sticky; bottom: 0; padding-top: 12px; background: linear-gradient(0deg, var(--panel) 82%, transparent); }
+.bulletin-list { min-height: 420px; }
 .record { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 15px; align-items: center; padding: 11px 12px; border: 1px solid #272d34; background: #0d1014; }
 .record strong { display: block; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .record small { display: block; margin-top: 5px; color: #858d97; font-size: 10px; line-height: 1.35; }
