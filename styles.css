@@ -41,15 +41,16 @@ svg { width: 18px; height: 18px; stroke-width: 1.8; }
 .status-dot.online { background: var(--green); box-shadow: 0 0 12px color-mix(in srgb, var(--green) 75%, transparent); }
 .status-dot.offline { background: var(--red); }
 
-.hero { min-height: 480px; position: relative; display: grid; align-items: end; overflow: hidden; background: #0b0d10 url("./assets/gridlock-courthouse.jpg") center 48% / cover no-repeat; border-bottom: 1px solid #353a41; }
-.hero-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(6,8,10,.96) 0%, rgba(6,8,10,.76) 44%, rgba(6,8,10,.18) 77%), linear-gradient(0deg, rgba(6,8,10,.94), transparent 58%); }
-.hero-content { position: relative; z-index: 2; width: 700px; padding: 64px 72px 76px; }
+.hero { min-height: 520px; position: relative; display: grid; place-items: center; overflow: hidden; background: #0b0d10 url("./assets/gridlock-courthouse.jpg") center 48% / cover no-repeat; border-bottom: 1px solid #353a41; }
+.hero-shade { position: absolute; inset: 0; background: radial-gradient(circle at 50% 42%, rgba(6,8,10,.1), rgba(6,8,10,.64) 48%, rgba(6,8,10,.95) 100%), linear-gradient(0deg, rgba(6,8,10,.94), transparent 58%); }
+.hero-content { position: relative; z-index: 2; width: min(760px, calc(100% - 40px)); padding: 56px 24px 96px; text-align: center; }
 .eyebrow, .kicker, .panel-label { color: var(--red-bright); font-size: 10px; letter-spacing: 1.7px; font-weight: 800; text-transform: uppercase; }
-.eyebrow { display: flex; gap: 22px; margin-bottom: 18px; color: #d5d9df; }
+.eyebrow { display: flex; justify-content: center; gap: 22px; margin-bottom: 18px; color: #d5d9df; }
 .eyebrow span:first-child { color: var(--red-bright); }
-.hero h1 { margin: 0; max-width: 600px; font-size: 58px; line-height: .98; letter-spacing: 0; }
-.hero-content > p { max-width: 600px; margin: 22px 0 29px; color: #c1c6cd; font-size: 17px; line-height: 1.65; }
-.hero-actions { display: flex; gap: 10px; }
+.gridlock-hero-mark { margin: 0 auto 28px; color: #f4f4f4; font-family: Impact, Haettenschweiler, "Arial Black", sans-serif; font-size: clamp(58px, 12vw, 128px); line-height: .82; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 6px 0 #6f6f6f, 0 12px 0 #202020, -4px -4px 0 #111, 4px -4px 0 #111, -4px 4px 0 #111, 4px 4px 0 #111, 0 20px 30px rgba(0,0,0,.78); transform: skewX(-5deg); }
+.hero h1 { margin: 0 auto; max-width: 600px; font-size: 58px; line-height: .98; letter-spacing: 0; }
+.hero-content > p { max-width: 600px; margin: 22px auto 29px; color: #c1c6cd; font-size: 17px; line-height: 1.65; }
+.hero-actions { display: flex; justify-content: center; gap: 10px; }
 .primary-button, .ghost-button, .danger-button { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 0 16px; border-radius: 4px; border: 1px solid transparent; text-decoration: none; cursor: pointer; font-size: 12px; font-weight: 750; transition: .18s ease; }
 .primary-button { background: var(--red); color: white; border-color: #ed4352; }
 .primary-button:hover { background: #ee394a; transform: translateY(-1px); }

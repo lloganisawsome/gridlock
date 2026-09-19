@@ -22,7 +22,7 @@ const state = {
 };
 
 const demo = {
-  news: [{ title: "Welcome to the Gridlock Civic Network", body: "Live city records, server information, public safety updates, and community services now share one home.", category: "City announcement", timestamp: Date.now() }],
+  news: [{ title: "Welcome to Gridlock", body: "Live server information, city updates, and community services now share one home.", category: "City announcement", timestamp: Date.now() }],
   officials: { president: "Vacant", governor: "Vacant", mayor: "Vacant", chiefOfPolice: "Vacant" },
   events: [{ title: "Opening session", date: "To be announced", location: "City Hall" }],
   transit: [{ name: "Central Rail", status: "Planning", detail: "Route details pending" }],
@@ -266,12 +266,12 @@ function renderRecords() {
     .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))
     .slice(0, 12)
     .map((item) => record(item.category || "Community", item.content, `${item.author || "Unknown"} · ${item.source || "web"}`))
-    .join("") || empty("No Civic Network bulletins yet.");
+    .join("") || empty("No bulletin posts yet.");
   $("#civicChatList").innerHTML = values(state.civicChat)
     .sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))
     .slice(0, 16)
     .map((item) => record(item.author || item.minecraftName || "Unknown", item.message, item.source || "web"))
-    .join("") || empty("No Civic chat messages yet.");
+    .join("") || empty("No chat messages yet.");
   const activeIncidents = values(data.dispatches).filter((item) => !String(item.status || "").startsWith("closed")).length;
   const activeWarrants = values(data.warrants).filter((item) => item.status === "active").length;
   $("#dailyActive").textContent = profiles.filter((item) => item.online).length;
@@ -439,7 +439,7 @@ $("#bulletinForm").addEventListener("submit", async (event) => {
       body: JSON.stringify({ category: $("#bulletinCategory").value, content: $("#bulletinContent").value.trim() })
     });
     event.target.reset();
-    $("#bulletinResult").textContent = "Posted to the Civic Network.";
+    $("#bulletinResult").textContent = "Posted to Gridlock.";
   } catch (error) {
     $("#bulletinResult").textContent = error.message;
   }
