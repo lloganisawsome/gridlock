@@ -10,4 +10,4 @@ export const firebaseConfig = {
 
 // Change this after the bridge is deployed. HTTPS is required from GitHub Pages.
 export const API_BASE = "https://blackbox.tailc5e5d1.ts.net:8443";
-export const MAP_RENDER_URL = "";
+export const MAP_RENDER_URL = "https://blackbox.tailc5e5d1.ts.net:10000/map/";
