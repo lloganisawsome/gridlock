@@ -112,6 +112,11 @@ svg { width: 18px; height: 18px; stroke-width: 1.8; }
 .icon-button:hover { border-color: var(--line-hot); color: white; }
 .map-canvas { position: relative; overflow: hidden; background-color: #12171c; background-image: linear-gradient(rgba(91,102,113,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(91,102,113,.12) 1px, transparent 1px), linear-gradient(32deg, transparent 46%, rgba(97,108,118,.28) 47%, rgba(97,108,118,.28) 50%, transparent 51%), linear-gradient(-24deg, transparent 46%, rgba(88,99,109,.18) 47%, rgba(88,99,109,.18) 50%, transparent 51%); background-size: 28px 28px, 28px 28px, 260px 220px, 350px 280px; }
 .map-canvas::before { content: "DOWNTOWN"; position: absolute; left: 46%; top: 43%; padding: 6px 9px; color: rgba(225,230,235,.35); border: 1px solid rgba(225,230,235,.12); font-size: 10px; letter-spacing: 2px; }
+.map-canvas.real-map { background-image: none; background-color: #07090c; }
+.map-canvas.real-map::before { content: none; }
+.rendered-map-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #07090c; }
+.compact .rendered-map-frame { pointer-events: none; }
+.marker-layer { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
 .map-canvas.compact { height: 245px; border: 1px solid #272d34; }
 .map-canvas.full { height: 640px; transform-origin: center; }
 .map-marker { position: absolute; display: flex; align-items: center; gap: 7px; padding: 5px 8px 5px 6px; color: white; background: #171c22; border: 1px solid #56616c; border-radius: 3px; font-size: 10px; font-weight: 750; box-shadow: 0 5px 16px rgba(0,0,0,.4); transform: translate(-50%, -50%); }

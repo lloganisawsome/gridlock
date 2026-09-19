@@ -173,17 +173,21 @@ function renderMap(target = $("#liveMap")) {
   if (!target) return;
   const data = normalizedPublic();
   const external = state.public?.config?.mapRenderUrl || MAP_RENDER_URL;
-  target.style.backgroundImage = external ? `url("${external}")` : "";
+  target.classList.toggle("real-map", Boolean(external));
+  target.style.backgroundImage = "";
   const source = state.mapLayer === "property"
     ? values(data.properties).map((item) => ({ ...item, label: item.name, className: "property" }))
     : state.mapLayer === "incidents"
       ? values(data.dispatches).filter((item) => !String(item.status).startsWith("closed")).map((item) => ({ ...item, label: item.type, className: "incident" }))
       : values(state.livePlayers).map((item) => ({ ...item, label: item.username, className: "" }));
-  target.innerHTML = source.map((item) => {
+  const markers = source.map((item) => {
     const point = mapPosition(item.location || item);
     return `<span class="map-marker ${item.className}" style="left:${point.left};top:${point.top}">${esc(item.label || "Marker")}</span>`;
   }).join("");
-  if (target.id === "liveMap") target.style.transform = `scale(${state.mapZoom})`;
+  target.innerHTML = external
+    ? `<iframe class="rendered-map-frame" src="${esc(external)}" title="Interactive Gridlock rendered map" loading="lazy"></iframe><div class="marker-layer">${markers}</div>`
+    : markers;
+  if (target.id === "liveMap") target.style.transform = external ? "none" : `scale(${state.mapZoom})`;
 }
 
 function renderRecords() {
