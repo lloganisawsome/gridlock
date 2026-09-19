@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithCustomToken, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+import { browserLocalPersistence, getAuth, onAuthStateChanged, setPersistence, signInWithCustomToken, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 import { getDatabase, onValue, push, ref, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 import { getMessaging, getToken, isSupported, onMessage } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-messaging.js";
 import { API_BASE, firebaseConfig, MAP_RENDER_URL, WEB_PUSH_PUBLIC_KEY } from "./firebase-config.js";
@@ -7,6 +7,7 @@ import { API_BASE, firebaseConfig, MAP_RENDER_URL, WEB_PUSH_PUBLIC_KEY } from ".
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
+setPersistence(auth, browserLocalPersistence).catch(() => {});
 const messagingReady = isSupported().then((supported) => supported ? getMessaging(app) : null).catch(() => null);
 const state = {
   status: {},
@@ -310,7 +311,8 @@ onAuthStateChanged(auth, (user) => {
   if (!user) {
     $("#pushSubscribeResult").textContent = "Sign in, then allow notifications so announcements can reach this device.";
   } else if ("Notification" in window && Notification.permission === "granted") {
-    $("#pushSubscribeResult").textContent = "Notifications are already allowed on this device.";
+    $("#pushSubscribeResult").textContent = "Notifications are allowed. Registering this device for announcements...";
+    enablePushNotifications({ prompt: false });
   } else {
     $("#pushSubscribeResult").textContent = "Please click Enable announcement alerts and choose Allow when your browser asks.";
     maybeAskForNotifications();
@@ -380,12 +382,15 @@ $("#linkCodeButton").addEventListener("click", async () => {
   }
 });
 
-async function enablePushNotifications() {
+async function enablePushNotifications(options = {}) {
+  const prompt = options.prompt !== false;
   if (!state.user) { $("#pushSubscribeResult").textContent = "Sign in first."; return; }
-  $("#pushSubscribeResult").textContent = "Your browser is about to ask for notification permission. Choose Allow for Gridlock announcements.";
+  $("#pushSubscribeResult").textContent = prompt
+    ? "Your browser is about to ask for notification permission. Choose Allow for Gridlock announcements."
+    : "Registering this device for Gridlock announcements...";
   try {
     if (!("serviceWorker" in navigator) || !("Notification" in window)) throw new Error("This browser does not support web push.");
-    const permission = await Notification.requestPermission();
+    const permission = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
     if (permission !== "granted") throw new Error("Notifications were not allowed.");
     const messaging = await messagingReady;
     if (!messaging) throw new Error("Firebase Messaging is not supported in this browser.");
@@ -408,12 +413,12 @@ function maybeAskForNotifications() {
   localStorage.setItem("gridlockNotificationPrompted", "1");
   setTimeout(() => {
     if (confirm("Allow Gridlock announcement notifications on this device?")) {
-      enablePushNotifications();
+      enablePushNotifications({ prompt: true });
     }
   }, 600);
 }
 
-$("#pushSubscribeButton").addEventListener("click", enablePushNotifications);
+$("#pushSubscribeButton").addEventListener("click", () => enablePushNotifications({ prompt: true }));
 
 messagingReady.then((messaging) => {
   if (!messaging) return;
