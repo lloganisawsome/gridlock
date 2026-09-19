@@ -185,7 +185,7 @@ function renderMap(target = $("#liveMap")) {
     return `<span class="map-marker ${item.className}" style="left:${point.left};top:${point.top}">${esc(item.label || "Marker")}</span>`;
   }).join("");
   target.innerHTML = external
-    ? `<iframe class="rendered-map-frame" src="${esc(external)}" title="Interactive Gridlock rendered map" loading="lazy"></iframe><div class="marker-layer">${markers}</div>`
+    ? `<iframe class="rendered-map-frame" src="${esc(external)}" title="Interactive Gridlock rendered map" loading="lazy"></iframe>`
     : markers;
   if (target.id === "liveMap") target.style.transform = external ? "none" : `scale(${state.mapZoom})`;
 }
