@@ -169,10 +169,25 @@ function mapPosition(location) {
   };
 }
 
+function normalizedMapUrl(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  try {
+    const url = new URL(raw, window.location.href);
+    if (url.hostname === "blackbox.tailc5e5d1.ts.net" && url.port === "10000" && (url.pathname === "/" || !url.pathname)) {
+      url.pathname = "/map/";
+    }
+    if (!url.pathname.endsWith("/")) url.pathname += "/";
+    return url.href;
+  } catch {
+    return raw;
+  }
+}
+
 function renderMap(target = $("#liveMap")) {
   if (!target) return;
   const data = normalizedPublic();
-  const external = state.public?.config?.mapRenderUrl || MAP_RENDER_URL;
+  const external = normalizedMapUrl(state.public?.config?.mapRenderUrl || MAP_RENDER_URL);
   target.classList.toggle("real-map", Boolean(external));
   target.style.backgroundImage = "";
   const source = state.mapLayer === "property"
@@ -184,9 +199,14 @@ function renderMap(target = $("#liveMap")) {
     const point = mapPosition(item.location || item);
     return `<span class="map-marker ${item.className}" style="left:${point.left};top:${point.top}">${esc(item.label || "Marker")}</span>`;
   }).join("");
-  target.innerHTML = external
-    ? `<iframe class="rendered-map-frame" src="${esc(external)}" title="Interactive Gridlock rendered map" loading="lazy"></iframe>`
-    : markers;
+  if (external) {
+    const frame = target.querySelector(".rendered-map-frame");
+    if (!frame || frame.getAttribute("src") !== external) {
+      target.innerHTML = `<iframe class="rendered-map-frame" src="${esc(external)}" title="Interactive Gridlock rendered map" loading="lazy"></iframe>`;
+    }
+  } else {
+    target.innerHTML = markers;
+  }
   if (target.id === "liveMap") target.style.transform = external ? "none" : `scale(${state.mapZoom})`;
 }
 
