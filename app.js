@@ -18,7 +18,8 @@ const state = {
   civicChat: {},
   user: null,
   mapLayer: "players",
-  mapZoom: 1
+  mapZoom: 1,
+  mapVersion: 0
 };
 
 const demo = {
@@ -209,6 +210,17 @@ function normalizedMapUrl(value) {
   }
 }
 
+function mapFrameUrl(external) {
+  if (!external) return "";
+  try {
+    const url = new URL(external, window.location.href);
+    if (state.mapVersion) url.searchParams.set("v", String(Math.floor(state.mapVersion)));
+    return url.href;
+  } catch {
+    return external;
+  }
+}
+
 function renderMap(target = $("#liveMap")) {
   if (!target) return;
   const data = normalizedPublic();
@@ -225,9 +237,10 @@ function renderMap(target = $("#liveMap")) {
     return `<span class="map-marker ${item.className}" style="left:${point.left};top:${point.top}">${esc(item.label || "Marker")}</span>`;
   }).join("");
   if (external) {
+    const frameUrl = mapFrameUrl(external);
     const frame = target.querySelector(".rendered-map-frame");
-    if (!frame || frame.getAttribute("src") !== external) {
-      target.innerHTML = `<iframe class="rendered-map-frame" src="${esc(external)}" title="Interactive Gridlock rendered map" loading="lazy"></iframe>`;
+    if (!frame || frame.getAttribute("src") !== frameUrl) {
+      target.innerHTML = `<iframe class="rendered-map-frame" src="${esc(frameUrl)}" title="Interactive Gridlock rendered map" loading="lazy"></iframe>`;
     }
   } else {
     target.innerHTML = markers;
@@ -299,6 +312,21 @@ onValue(ref(db, "public/playerProfiles"), (snapshot) => { state.players = snapsh
 onValue(ref(db, "public"), (snapshot) => { state.public = snapshot.val() || {}; renderAll(); });
 onValue(ref(db, "public/bulletins"), (snapshot) => { state.bulletins = snapshot.val() || {}; renderAll(); });
 onValue(ref(db, "public/civicChat"), (snapshot) => { state.civicChat = snapshot.val() || {}; renderAll(); });
+
+async function refreshMapVersion() {
+  try {
+    const status = await publicApi("/api/map/status");
+    const nextVersion = Number(status.updatedAt || 0);
+    if (nextVersion && nextVersion !== state.mapVersion) {
+      const hadVersion = Boolean(state.mapVersion);
+      state.mapVersion = nextVersion;
+      if (hadVersion) renderMap();
+    }
+  } catch {
+    // The embedded map keeps working even if the status check is temporarily unavailable.
+  }
+}
+
 onAuthStateChanged(auth, (user) => {
   state.user = user;
   const identity = user?.displayName || user?.email || "";
@@ -465,5 +493,7 @@ setInterval(() => {
   $("#worldClock").textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   renderStatus();
 }, 1000);
+setInterval(refreshMapVersion, 60000);
+refreshMapVersion();
 activateView(location.hash.slice(1) || "overview");
 renderAll();
