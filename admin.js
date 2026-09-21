@@ -53,6 +53,34 @@ function roleName(role) {
   return role === "owner" ? "OWNER" : role === "admin" ? "ADMIN" : role === "staff" ? "STAFF" : "NONE";
 }
 
+function renderPregenStatus(pregen) {
+  if (!pregen) {
+    $("#pregenStatus").innerHTML = '<div class="empty">Waiting for Minecraft telemetry...</div>';
+    return;
+  }
+  const bounds = pregen.bounds || {};
+  const percent = Number(pregen.percent || 0);
+  const elapsed = Number(pregen.elapsedSeconds || 0);
+  const minutes = Math.floor(elapsed / 60);
+  const seconds = elapsed % 60;
+  const areas = pregen.manager?.gridlockAreas?.length
+    ? `${pregen.manager.gridlockAreas.length} temporary area(s) active`
+    : "No Gridlock temporary areas active";
+  $("#pregenStatus").innerHTML = [
+    record(
+      `${String(pregen.status || "unknown").toUpperCase()} · ${percent.toFixed(1)}%`,
+      `${Number(pregen.completedChunks || 0).toLocaleString()} / ${Number(pregen.totalChunks || 0).toLocaleString()} chunks · ${Number(pregen.completedBatches || 0).toLocaleString()} / ${Number(pregen.totalBatches || 0).toLocaleString()} batches`,
+      pregen.mode === "full" ? "FULL" : "TEST"
+    ),
+    record(
+      "Chunk-aligned bounds",
+      `X ${bounds.minX ?? "--"} to ${bounds.maxX ?? "--"} · Z ${bounds.minZ ?? "--"} to ${bounds.maxZ ?? "--"} · batch ${pregen.batchSize || "--"}x${pregen.batchSize || "--"} chunks`,
+      `${minutes}m ${seconds}s`
+    ),
+    record("Safety", `${areas} · ${pregen.message || "No message"}`, `capacity ${pregen.manager?.chunkCount ?? "--"}/${pregen.manager?.maxChunkCount ?? "--"}`)
+  ].join("");
+}
+
 function renderStaff(members = []) {
   $("#staffList").innerHTML = members.length
     ? members.map((member) => record(member.email || member.uid, member.minecraftName ? `Player: ${member.minecraftName}` : "Firebase account", roleName(member.role))).join("")
@@ -85,6 +113,7 @@ async function loadOverview() {
   $("#publicLocations").checked = overview.config?.publicLocations !== false;
   $("#acceptForms").checked = overview.config?.acceptForms !== false;
   $("#mapRenderUrl").value = overview.config?.mapRenderUrl || "";
+  renderPregenStatus(overview.pregen);
   const analytics = overview.analytics || {};
   $("#adminAnalytics").innerHTML = [
     ["Citizens", analytics.citizens || 0],
@@ -205,6 +234,20 @@ $("#backupButton").addEventListener("click", async () => {
     await api("/api/admin/backup", { method: "POST" });
     await loadOverview();
     toast("Firebase backup saved.");
+  } catch (error) { toast(error.message); }
+});
+
+$("#pregenForm").addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-pregen-action]");
+  if (!button) return;
+  const action = button.dataset.pregenAction;
+  const mode = $("#pregenMode").value;
+  if (action === "start" && mode === "full" && !confirm("Start FULL map pregeneration? This will run in the background across the whole website map area.")) return;
+  if (action === "cancel" && !confirm("Cancel the pregeneration job? Existing generated chunks stay in the world.")) return;
+  try {
+    await api("/api/admin/map-pregen", { method: "POST", body: JSON.stringify({ action, mode }) });
+    toast(`Pregeneration ${action} queued.`);
+    setTimeout(loadOverview, 2500);
   } catch (error) { toast(error.message); }
 });
 

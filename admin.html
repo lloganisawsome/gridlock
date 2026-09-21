@@ -41,6 +41,22 @@
           <form id="commandForm" class="form-stack"><select id="commandPreset"><option value="say City Hall announcement incoming.">Broadcast notice</option><option value="save hold">Hold world save</option><option value="save resume">Resume world save</option><option value="weather clear">Clear weather</option><option value="">Custom command</option></select><input id="serverCommand" placeholder="Minecraft command without /"><button class="danger-button" type="submit">Queue command</button></form>
           <form id="broadcastForm" class="form-stack inline-form"><input id="broadcastText" placeholder="Broadcast message" maxlength="220"><button class="ghost-button" type="submit">Broadcast</button></form>
         </article>
+        <article class="panel span-2">
+          <header><h3>Map pregeneration</h3><i data-lucide="map"></i></header>
+          <p>Server-side background chunk generation for the uNmINeD website map. Run the test region first; full covers the current public map bounds.</p>
+          <div class="record-list" id="pregenStatus"><div class="empty">Waiting for Minecraft telemetry...</div></div>
+          <form id="pregenForm" class="form-stack">
+            <select id="pregenMode"><option value="test">Small test region</option><option value="full">Full website map region</option></select>
+            <div class="button-row">
+              <button class="primary-button" type="button" data-pregen-action="start">Start Generation</button>
+              <button class="ghost-button" type="button" data-pregen-action="pause">Pause</button>
+              <button class="ghost-button" type="button" data-pregen-action="resume">Resume</button>
+              <button class="danger-button" type="button" data-pregen-action="cancel">Cancel</button>
+              <button class="ghost-button" type="button" data-pregen-action="cleanup">Cleanup Areas</button>
+              <button class="ghost-button" type="button" data-pregen-action="status">Chat Status</button>
+            </div>
+          </form>
+        </article>
         <article class="panel">
           <header><h3>Network configuration</h3><i data-lucide="settings-2"></i></header>
           <form id="configForm" class="form-stack"><label class="toggle-row"><span>Maintenance mode</span><input id="maintenanceMode" type="checkbox"></label><label class="toggle-row"><span>Public player locations</span><input id="publicLocations" type="checkbox" checked></label><label class="toggle-row"><span>Accept community forms</span><input id="acceptForms" type="checkbox" checked></label><input id="mapRenderUrl" placeholder="BlueMap / map renderer URL"><button class="primary-button" type="submit">Save configuration</button></form>
@@ -73,7 +89,7 @@
           </form>
         </article>
         <article class="panel span-2">
-          <header><h3>Publish city record</h3><i data-lucide="file-plus-2"></i></header>
+          <header><h3>Publish civic record</h3><i data-lucide="file-plus-2"></i></header>
           <form id="publicRecordForm" class="form-stack">
             <select id="recordCollection"><option value="events">Event calendar</option><option value="transit">Transit update</option><option value="roads">Road update</option><option value="airports">Airport schedule</option><option value="construction">Construction project</option><option value="permits">Building permit</option><option value="elections">Election or vote</option><option value="laws">Law or public code</option><option value="timeline">Historical timeline</option></select>
             <input id="recordTitle" placeholder="Title" maxlength="100" required>
